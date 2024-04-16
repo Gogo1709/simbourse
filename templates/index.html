@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulation Boursière</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Simulation Boursière</h1>
+      <p>Capital disponible : {{ capital }} €</p>
+
+      {% for action, prix in prix_actions.items() %}
+      <div class="action">
+        <h2>{{ action.capitalize() }}</h2>
+        <p>Nombre d'actions détenues : {{ actions_detenues[action] }}</p>
+        <p>Prix : {{ prix }} €</p>
+        <form
+          onsubmit="return validateForm('acheter', 1, '{{ action }}')"
+          method="post"
+        >
+          <input type="hidden" name="action" value="acheter" />
+          <input type="hidden" name="quantite" value="1" />
+          <input type="hidden" name="type_action" value="{{ action }}" />
+          <button type="submit">Acheter (x1)</button>
+        </form>
+        <form
+          onsubmit="return validateForm('acheter', 10, '{{ action }}')"
+          method="post"
+        >
+          <input type="hidden" name="action" value="acheter" />
+          <input type="hidden" name="quantite" value="10" />
+          <input type="hidden" name="type_action" value="{{ action }}" />
+          <button type="submit">Acheter (x10)</button>
+        </form>
+        <form
+          onsubmit="return validateForm('vendre', 1, '{{ action }}')"
+          method="post"
+        >
+          <input type="hidden" name="action" value="vendre" />
+          <input type="hidden" name="quantite" value="1" />
+          <input type="hidden" name="type_action" value="{{ action }}" />
+          <button type="submit">Vendre (x1)</button>
+        </form>
+        <form
+          onsubmit="return validateForm('vendre', 10, '{{ action }}')"
+          method="post"
+        >
+          <input type="hidden" name="action" value="vendre" />
+          <input type="hidden" name="quantite" value="10" />
+          <input type="hidden" name="type_action" value="{{ action }}" />
+          <button type="submit">Vendre (x10)</button>
+        </form>
+      </div>
+      {% endfor %}
+
+      <form action="/terminer" method="POST">
+        <button type="submit">Terminer</button>
+      </form>
+    </div>
+
+    <script>
+      function validateForm(action, quantite, typeAction) {
+        const capital = {{ capital }};
+        const actionsDetenues = {
+          {% for key, value in actions_detenues.items() %}
+          '{{ key }}': {{ value }},
+          {% endfor %}
+        };
+        const prixAction = {
+          {% for key, value in prix_actions.items() %}
+          '{{ key }}': {{ value }},
+          {% endfor %}
+        };
+
+        if (action === 'acheter') {
+          let montantTotal = prixAction[typeAction] * quantite;
+          if (capital < montantTotal) {
+            alert("Capital insuffisant");
+            return false;
+        } else if (action === 'vendre') {
+          if (actionsDetenues[typeAction] < quantite) {
+            alert("Vous ne pouvez pas vendre plus d'actions que vous possédez");
+            return false;
+          }
+        }
+        return true;
+      }
+    </script>
+  </body>
+</html>
